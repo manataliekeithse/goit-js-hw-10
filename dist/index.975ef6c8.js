@@ -503,6 +503,98 @@ function hmrAcceptRun(bundle, id) {
 }
 
 },{}],"8lqZg":[function(require,module,exports) {
+var _catApi = require("./cat-api");
+const breedSelectEl = document.querySelector(".breed-select");
+const catInfoEl = document.querySelector(".cat-info");
+const loaderEl = document.querySelector(".loader");
+const errorEl = document.querySelector(".error");
+errorEl.classList.add("is-hidden");
+function chooseBreed() {
+    (0, _catApi.fetchBreeds)().then((data)=>{
+        loaderEl.classList.replace("loader", "is-hidden");
+        let optionsMarkup = data.map(({ name , id  })=>{
+            return `<option value=${id}>${name}</option>`;
+        });
+        breedSelectEl.insertAdjacentHTML("beforeend", optionsMarkup);
+        breedSelectEl.classList.remove("is-hidden");
+    }).catch(onError);
+}
+chooseBreed();
+breedSelectEl.addEventListener("change", (e)=>{
+    loaderEl.classList.replace("is-hidden", "loader");
+    breedSelectEl.classList.add("is-hidden");
+    catInfoEl.classList.add("is-hidden");
+    let breedId = e.target.value;
+    (0, _catApi.fetchCatByBreed)(breedId).then((data)=>{
+        const { url , breeds  } = data[0];
+        const { name , description , temperament  } = breeds[0];
+        catInfoEl.innerHTML = `
+        <img src='${url}' alt='${name}' width=400 />
+        <div class='box'>
+          <h2>${name}</h2>
+          <p>${description}</p>
+          <p>${temperament}</p>
+        </div>
+      `;
+        catInfoEl.classList.remove("is-hidden");
+        breedSelectEl.classList.remove("is-hidden");
+        loaderEl.classList.add("is-hidden");
+    }).catch(onError);
+});
+function onError() {
+    errorEl.classList.remove("is-hidden");
+    breedSelectEl.classList.add("is-hidden");
+}
+
+},{"./cat-api":"d7YdZ"}],"d7YdZ":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "fetchBreeds", ()=>fetchBreeds);
+parcelHelpers.export(exports, "fetchCatByBreed", ()=>fetchCatByBreed);
+const BASE_URL = "https://api.thecatapi.com/v1";
+const API_KEY = "live_ehFm50B7nJAxuK22Wm1oDJ8ZjQ92pNu5zKCSW1PMteAUK39FNZPKh0w84bM7ni35";
+function fetchBreeds() {
+    return fetch(`${BASE_URL}/breeds?api_key=${API_KEY}`).then((res)=>{
+        if (!res.ok) throw new Error(res.status);
+        else return res.json();
+    });
+}
+function fetchCatByBreed(breedId) {
+    return fetch(`${BASE_URL}/images/search?api_key=${API_KEY}&breed_ids=${breedId}`).then((res)=>{
+        if (!res.ok) throw new Error(res.status);
+        else return res.json();
+    });
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
+exports.interopDefault = function(a) {
+    return a && a.__esModule ? a : {
+        default: a
+    };
+};
+exports.defineInteropFlag = function(a) {
+    Object.defineProperty(a, "__esModule", {
+        value: true
+    });
+};
+exports.exportAll = function(source, dest) {
+    Object.keys(source).forEach(function(key) {
+        if (key === "default" || key === "__esModule" || dest.hasOwnProperty(key)) return;
+        Object.defineProperty(dest, key, {
+            enumerable: true,
+            get: function() {
+                return source[key];
+            }
+        });
+    });
+    return dest;
+};
+exports.export = function(dest, destName, get) {
+    Object.defineProperty(dest, destName, {
+        enumerable: true,
+        get: get
+    });
+};
 
 },{}]},["1RB6v","8lqZg"], "8lqZg", "parcelRequired7c6")
 
